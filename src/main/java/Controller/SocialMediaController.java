@@ -1,5 +1,6 @@
 package Controller;
 
+import Service.LoginService;
 import Service.UserRegistrationService;
 
 import io.javalin.Javalin;
@@ -16,9 +17,11 @@ import Model.Account;
  */
 public class SocialMediaController {
     UserRegistrationService userRegistrationService;
+    LoginService loginService;
 
     public SocialMediaController() {
         this.userRegistrationService = new UserRegistrationService();
+        this.loginService = new LoginService();
     }
 
     /**
@@ -29,6 +32,8 @@ public class SocialMediaController {
     public Javalin startAPI() {
         Javalin app = Javalin.create();
         app.post("/register", this::postAccountHandler);
+        app.post("/login", this::loginHandler);
+
         return app;
     }
 
@@ -53,6 +58,30 @@ public class SocialMediaController {
         else
         {
             context.status(400);
+        }
+    }
+
+    /**
+     * POST Login handler
+     * @param context The Javalin Context object manages information about both the HTTP request and response.
+     */
+    private void loginHandler(Context context) throws JsonProcessingException {
+        // Map the account
+        ObjectMapper mapper = new ObjectMapper();
+        Account account = mapper.readValue(context.body(), Account.class);
+
+        // Utilize service to login
+        Account loginAccount = loginService.login(account);
+
+        // Convert the HTTP body to JSON if successful
+        if(loginAccount != null)
+        {
+            context.json(mapper.writeValueAsString(loginAccount));
+        }
+        // Set the HTTP response status to 401 if unsuccessful (Unauthorized)
+        else
+        {
+            context.status(401);
         }
     }
 
