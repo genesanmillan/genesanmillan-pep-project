@@ -1,18 +1,16 @@
 package Service;
 
-import java.util.ArrayList;
-
 import Model.Account;
-import DAO.UserRegistrationDAO;
+import DAO.AccountDAO;
 
-public class UserRegistrationService {
+public class AccountService {
 
     // DAO to be utilized for this service
-    private UserRegistrationDAO dao;
+    private AccountDAO dao;
 
     // Constructor for this Service
-    public UserRegistrationService() {
-        dao = new UserRegistrationDAO();
+    public AccountService() {
+        dao = new AccountDAO();
     }
 
     /**
@@ -45,9 +43,13 @@ public class UserRegistrationService {
     }
 
     /**
-     * This method retrieves and prints all accounts from the database using the DAO.
+     * This method checks the login credentials and retrieves the account if successful.
+     *
+     * @param account Account object containing username and password
+     * @return Account object if login is successful, null otherwise
      */
-    public void printAllAccounts() {
-        dao.printAllAccounts();
+
+     public Account login(Account account) {
+        return dao.login(account);
     }
 }
