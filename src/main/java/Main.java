@@ -3,7 +3,7 @@ import DAO.UserRegistrationDAO;
 import io.javalin.Javalin;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import Model.Account;
-import Service.UserRegistrationService;
+import Model.Message;
 import Util.ConnectionUtil;
 import java.io.IOException;
 import java.net.URI;
@@ -26,41 +26,39 @@ public class Main {
 
         Main mainInstance = new Main();
 
-        try {
-            mainInstance.registerUserSuccessful();
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        System.out.println("Printing Accounts: ");
-        (new UserRegistrationService()).printAllAccounts();
+        // try {
+        //     mainInstance.createMessageSuccessful();
+        // } catch (IOException | InterruptedException e) {
+        //     e.printStackTrace();
+        // }
     }
 
-    public void registerUserSuccessful() throws IOException, InterruptedException {
+    public void createMessageSuccessful() throws IOException, InterruptedException {
+
         HttpClient webClient = HttpClient.newHttpClient();
         ObjectMapper objectMapper = new ObjectMapper();
-        HttpRequest postRequest = HttpRequest.newBuilder()
-                .uri(URI.create("http://localhost:8080/register"))
-                .POST(HttpRequest.BodyPublishers.ofString("{" +
-                        "\"username\": \"user\", " +
-                        "\"password\": \"password\" }"))
+
+        HttpRequest postMessageRequest = HttpRequest.newBuilder()
+                .uri(URI.create("http://localhost:8080/messages"))
+                .POST(HttpRequest.BodyPublishers.ofString("{"+
+                        "\"posted_by\":1, " +
+                        "\"message_text\": \"hello message\", " +
+                        "\"time_posted_epoch\": 1669947792}"))
                 .header("Content-Type", "application/json")
                 .build();
-
-
-        HttpResponse response = webClient.send(postRequest, HttpResponse.BodyHandlers.ofString());
+        HttpResponse response = webClient.send(postMessageRequest, HttpResponse.BodyHandlers.ofString());
         int status = response.statusCode();
-        System.out.println("Status: " + status);
-        System.out.println("Response Body: " + response.body().toString());
-
-        System.out.println("----------------------------- End of Response -----------------------------");
         
-        Account expectedAccount = new Account(2, "user", "password");
-        System.out.println("Expected Account: " + expectedAccount.toString());
+        System.out.println("Status: " + status);     
+        System.out.println(response.body().toString());
 
-        Account actualAccount = objectMapper.readValue(response.body().toString(), Account.class);
-        System.out.println("Actual Account: " + actualAccount.toString());
+        ObjectMapper om = new ObjectMapper();
+        Message expectedResult = new Message(2, 1, "hello message", 1669947792);
+        
+        System.out.println(expectedResult.toString());
 
-
+        Message actualResult = om.readValue(response.body().toString(), Message.class);
+        
+        System.out.println(actualResult.toString());
     }
 }
